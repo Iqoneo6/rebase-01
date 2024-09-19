@@ -1,6 +1,9 @@
-export default {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
+module.exports = {
+  apps: [
+    {
+      name: "billing",
+      script: "index.js",
+      watch: true,
+    },
+  ],
 };
