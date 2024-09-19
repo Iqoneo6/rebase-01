@@ -1,5 +1,5 @@
 
-name: spa_server
+name: Backend
 
 on:
   push:
