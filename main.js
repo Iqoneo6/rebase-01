@@ -1,60 +1,183 @@
-// tracks section js
-// multiline string in js
-const tracks = [
-// Devpod
-`Best Use of <a href="https://devpod.sh" target="_blank" class="text-gray-400 hover:text-white">Devpod</a><br><br>Build a project that uses DevPod to win prizes and certifications, and stand a chance to be featured on the Loft blog. Each member of the winning team gets a T-shirt.<br>.<br>.<br>.<br>.<br>.<br>.<br>
-Best Share of <a href="https://devpod.sh" target="_blank" class="text-gray-400 hover:text-white">Devpod</a><br><br>Share about how you’re using DevPod on your socials, or write a blog post and win accessories. The winner of the best blog or social post gets Wireless In-Ear Earbuds.`,
-// AI/ML
-`Calling all AI-curious cats and coding wizards! ‍ Rebase&lt;01&gt;'s Machine Learning (ML) track is your chance to dive into the world of artificial intelligence, whether you're a total newbie or a seasoned pro.
-Think robots that see, chatbots that chat, and algorithms that predict the next big thing.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>you get a cool swag kit ;)`, 
 
-// IoT/ Hardware
-`Dive into the exciting world of hardware and embedded systems by building innovative projects that bridge the gap between the physical and digital worlds.
-Imagine controlling your home lights with your voice or creating a robot that follows your commands. That's the power of hardware.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>you get a cool swag kit ;)`,
+const express = require("express");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
-// Blockchain
-`This is your time to explore decentralized finance (DeFi) applications, enabling seamless peer-to-peer financial transactions, decentralized marketplaces, and novel governance models.
-One can design secure and transparent systems that empower users with greater control over their digital assets.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br> we've also got a polygon track where you can win upto $350. check out <a href="https://rebase01.devfolio.co/prizes" target="_blank" class="text-gray-400 hover:text-white">our devfolio page<a/> for more details. ;)`,
+require("dotenv").config();
+const mongoose = require("mongoose");
 
-// Sustainability
-`Use your tech skills to tackle real-world challenges and create a more sustainable future.
-Build impactful projects and dive into issues you care about, from climate change and renewable energy to social justice and community well-being.
-Show your collaborative spirit as you form a team with fellow changemakers and share your knowledge.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>you get a cool swag kit ;)`,
+const twilio = require("twilio");
 
-// Open Innovation
-`Ever dreamt of using technology to solve a real-world problem? Or maybe you have a unique idea for a game-changing app? If you're brimming with creativity and looking to bring your vision to life, then the Open Innovation track is calling you!
-This track is open to everyone, from seasoned developers to complete beginners.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>.<br>you get a cool swag kit ;)`,
+const app = express();
+app.use(express.json());
 
-// `Rebase&lt;06&gt; is a month-long online hackathon extravaganza where you can compete across various categories,This is your chance
-// to challenge yourself, learn new skills, and create remarkable projects that can make a real difference. Don't
-// miss this unparalleled opportunity to rebase your talent and elevate your skills to a new level. Step into
-// Rebase&lt;01&gt;—where creativity has no bounds. Rebase&lt;01&gt; is a month-long online hackathon extravaganza where you can compete across various categories,
-// showcasing your skills, creativity, and teamwork alongside peers who share your passion. This is your chance
-// to challenge yourself, learn new skills, and create remarkable projects that can make a real difference. Don't
-// miss this unparalleled opportunity to rebase your talent and elevate your skills to a new level. Step into
-// Rebase&lt;01&gt;—where creativity has no bounds.`,
+const path = require("path");
+const fs = require("fs");
 
-// `Rebase&lt;07&gt; is a month-long online hackathon extravaganza where you can compete across various categories,This is your chance
-// to challenge yourself, learn new skills, and create remarkable projects that can make a real difference. Don't
-// miss this unparalleled opportunity to rebase your talent and elevate your skills to a new level. Step into
-// Rebase&lt;01&gt;—where creativity has no bounds. Rebase&lt;01&gt; is a month-long online hackathon extravaganza where you can compete across various categories,
-// showcasing your skills, creativity, and teamwork alongside peers who share your passion. This is your chance
-// to challenge yourself, learn new skills, and create remarkable projects that can make a real difference. Don't
-// miss this unparalleled opportunity to rebase your talent and elevate your skills to a new level. Step into
-// Rebase&lt;01&gt;—where creativity has no bounds.`,
-]
+app.use(
+  cors({
+    origin: ["https://wizmoney.wizinoa.com"],
+    methods: ["GET", "POST", "DELETE", "PUT"],
+    credentials: true,
+  })
+);
+app.use(cookieParser());
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
-function addListenersandUpdateText() {
-  const tracksTopics = document.getElementsByClassName('tracks-topics').item(0).children;
-  const tracksText = document.querySelector('.tracks-body-text');
-  for (let i = 0; i < tracksTopics.length; i++) {
-    tracksTopics[i].addEventListener('click', function() {
-      tracksText.innerHTML = tracks[i];
-      console.log(tracks[i]);
-      console.log(tracksText);
+const port = process.env.PORT || 3005;
+const url = process.env.MONGODB_URL;
+
+const mail = process.env.AUTH_MAIL;
+
+const client = twilio(atob(process.env.T_SID), atob(process.env.T_TOKEN));
+
+const { sendReceipt } = require("./emailService");
+
+app.use(express.json());
+
+// Example endpoint to send receipt
+app.post("/send-receipt", async (req, res) => {
+  const { toEmail, subject, text, htmlContent, receiptFileName } = req.body;
+
+  // Receipt files are stored in a 'receipts' directory
+  const receiptPath = path.join(__dirname, "receipts", receiptFileName);
+
+  try {
+    console.log("testing");
+    await sendReceipt(toEmail, subject, text, htmlContent, receiptPath);
+    res
+      .status(200)
+      .json({ success: true, message: "Receipt sent successfully" });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to send receipt",
+      error: error.message,
     });
   }
-  console.log(tracksTopics);
-}
+});
 
-document.addEventListener('DOMContentLoaded', addListenersandUpdateText);
+const emailReceipt = require("./emailService");
+
+const ContributeForm = require("./Router/ContributeForm");
+const SignUp = require("./Router/SignUpRouter");
+const Mail = require("nodemailer/lib/mailer");
+const sendOtp = require("./Controller/ResetPassword");
+
+const MessageRouter = require("./Router/MessageRouter");
+
+app.use("/api/ContributeForm", ContributeForm);
+
+app.use("/api/send-email", emailReceipt);
+app.use("/api/send-otp", sendOtp);
+app.use("/api", SignUp);
+
+app.use("/api/messager", MessageRouter);
+
+mongoose
+  .connect(url)
+  .then(() => {
+    app.listen(port, () => {
+      console.log("Server started");
+    });
+  })
+  .catch((err) => {
+    console.error("Error connecting to MongoDB:", err);
+  });
+
+// app.post('/api/contributeform/normalsms', (req, res) => {
+//   const { to, body } = req.body;
+
+//   if (!to || !body) {
+//     return res.status(400).send('Missing "to" or "body" parameter.');
+//   }
+
+//   let bodyText;
+
+//     const bodyObject = body;
+//     bodyText = ` \n\nOrganizer Name: ${bodyObject.organizerName },
+//      Date:  ${bodyObject.date },
+//      Place:  ${bodyObject.place },
+//      FunctionType:  ${bodyObject.functionType },
+//      Firstname:  ${bodyObject.fname },
+//      Lastname:  ${bodyObject.fname },
+//      Number:  ${bodyObject.number },
+//      PaymentType:  ${bodyObject.paymentType },
+//      Address:  ${bodyObject.address },
+//      Place:  ${bodyObject.place },
+//       Total:  ${bodyObject.total} ,
+//       Visit Our site \n  https://www.wizinoa.com/ \n\n
+//       Thank You!
+//       `
+
+//       ;
+
+//   client.messages.create({
+//     // body: [bodyText,"Thank You","https://www.wizinoa.com/"],
+//     body: bodyText,
+//     to: to,
+//     from: process.env.TWILIO_PHONE_NUMBER
+//   })
+//   .then((message) => {
+//     console.log('Message sent:', message.sid);
+//     res.status(200).send(`Message sent: ${message.sid}`);
+//   })
+//   .catch((error) => {
+//     console.error('Error sending message:', error);
+//     res.status(500).send('Failed to send SMS.');
+//   });
+// });
+
+// app.post('/api/contributeform/whatsappmessage', (req, res) => {
+//   const { to, body } = req.body;
+
+//   if (!to || !body) {
+//     return res.status(400).send('Missing "to" or "body" parameter.');
+//   }
+
+//   let bodyText;
+
+//   const bodyObject = body;
+//   bodyText = `Organizer Name: ${bodyObject.organizerName}
+// Date: ${bodyObject.date}
+// Place: ${bodyObject.place}
+// Function Type: ${bodyObject.functionType}
+// First Name: ${bodyObject.fname}
+// Last Name: ${bodyObject.lname}
+// Number: ${bodyObject.number}
+// Payment Type: ${bodyObject.paymentType}
+// Address: ${bodyObject.address}
+// Total: ${bodyObject.total}
+
+// Visit Our Site: https://www.wizinoa.com/
+
+// Thank You!`;
+
+//   client.messages.create({
+//     body: bodyText,
+//     to: `whatsapp:${to}`,
+//     from: process.env.TWILIO_WHATSAPP_NUMBER
+//   })
+//   .then((message) => {
+//     console.log('Message sent:', message);
+//     res.status(200).send(`Message sent: ${message}`);
+//   })
+//   .catch((error) => {
+//     console.error('Error sending message:', error);
+//     res.status(500).send('Failed to send WhatsApp message.');
+//   });
+// });
+
+// app.post('/api/contributeform/whatsappmessage', async (req, res) => {
+//   const { phoneNumber } = req.body;
+
+//   try {
+//     const receiver = new Receiver({ phoneNumber });
+//     await receiver.save();
+//     res.status(200).send('Receiver added successfully');
+//   } catch (error) {
+//     console.error('Error adding receiver:', error);
+//     res.status(500).send(`Error adding receiver: ${error.message}`);
+//   }
+// });
