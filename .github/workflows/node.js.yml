@@ -24,7 +24,7 @@ jobs:
 
       # Start PM2 application
     - name: Start PM2 application
-      run: pm2 start ecosystem.config.js --env production
+      run: pm2 start postcss.config.js --env production
 
     # Graceful reload of the PM2 process
     - name: Reload PM2 application
