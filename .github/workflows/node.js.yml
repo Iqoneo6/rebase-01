@@ -31,5 +31,5 @@ jobs:
       run: pm2 reload all
 
     # Restart Nginx to ensure it's running after PM2
-    # - name: Restart nginx service
-    #   run: sudo service nginx restart
+    - name: Restart nginx service
+      run: sudo service nginx restart
