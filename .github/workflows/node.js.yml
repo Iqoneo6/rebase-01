@@ -1,5 +1,5 @@
 
-name: REBASE 1
+name: Rebase
 
 on:
   push:
